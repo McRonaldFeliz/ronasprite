@@ -1,0 +1,42 @@
+:root {
+  color-scheme: dark; font-family: system-ui, sans-serif; font-size: 13px;
+  /* Cores do Ronasprite: roxo nas superfícies, amarelo nos destaques */
+  --roxo-escuro: #1d1230;
+  --roxo: #2e1b4d;
+  --roxo-claro: #4a2d7a;
+  --roxo-borda: #5e3d96;
+  --amarelo: #ffd23f;
+  --amarelo-escuro: #e0b400;
+  --texto: #f3eefc;
+}
+body { margin: 0; background: var(--roxo-escuro); color: var(--texto); }
+button { background: var(--roxo-claro); color: inherit; border: 1px solid var(--roxo-borda); border-radius: 4px; padding: 3px 8px; cursor: pointer; }
+button:hover { border-color: var(--amarelo); }
+button.on { background: var(--amarelo); color: var(--roxo-escuro); border-color: var(--amarelo-escuro); }
+li.on { outline: 2px solid var(--amarelo); }
+header strong { color: var(--amarelo); font-size: 16px; }
+h3 { color: var(--amarelo); }
+input[type=range], input[type=checkbox] { accent-color: var(--amarelo); }
+.app { display: grid; height: 100vh; grid-template: 'h h h' auto 'l m r' 1fr 'f f f' auto / 260px 1fr 220px; }
+header { grid-area: h; display: flex; gap: 16px; align-items: center; padding: 8px; border-bottom: 1px solid var(--roxo-borda); background: var(--roxo); }
+.tools { display: flex; gap: 4px; flex-wrap: wrap; }
+aside { padding: 8px; overflow: auto; border-color: var(--roxo-borda); background: var(--roxo); }
+.left { grid-area: l; border-right: 1px solid var(--roxo-borda); }
+.right { grid-area: r; border-left: 1px solid var(--roxo-borda); }
+main { grid-area: m; display: grid; place-items: center; overflow: auto; }
+footer { grid-area: f; border-top: 1px solid var(--roxo-borda); background: var(--roxo); padding: 8px; overflow-x: auto; }
+canvas { image-rendering: pixelated; }
+.editor { background: repeating-conic-gradient(#555 0 25%, #444 0 50%) 0 0 / 32px 32px; cursor: crosshair; touch-action: none; }
+.preview { background: #444; display: block; margin-bottom: 4px; }
+.swatches { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.sw { display: inline-block; width: 20px; height: 20px; padding: 0; border: 1px solid #000; }
+.used { list-style: none; padding: 0; }
+.used li { display: flex; align-items: center; gap: 6px; padding: 2px; }
+.used li span { flex: 1; font-family: monospace; }
+label { display: block; margin: 4px 0; }
+.replace, .similar { margin-top: 8px; padding: 6px; background: var(--roxo-claro); border-radius: 4px; }
+.layers { list-style: none; padding: 0; }
+.layers li { padding: 3px; cursor: pointer; }
+.frames { display: flex; gap: 6px; align-items: center; }
+.thumb { display: flex; flex-direction: column; align-items: center; padding: 2px; }
+.thumb canvas { width: 48px; height: 48px; background: #444; }
