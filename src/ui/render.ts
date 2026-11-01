@@ -25,3 +25,15 @@ export function downloadPng(img: PixelImage, name: string): void {
     URL.revokeObjectURL(a.href);
   }, 'image/png');
 }
+
+/** Lê um arquivo de imagem (PNG etc.) e devolve os pixels. */
+export async function readImageFile(file: File): Promise<PixelImage> {
+  const bmp = await createImageBitmap(file);
+  const c = document.createElement('canvas');
+  c.width = bmp.width;
+  c.height = bmp.height;
+  const ctx = c.getContext('2d')!;
+  ctx.drawImage(bmp, 0, 0);
+  const data = ctx.getImageData(0, 0, bmp.width, bmp.height).data;
+  return new PixelImage(bmp.width, bmp.height, new Uint32Array(data.buffer.slice(0)));
+}

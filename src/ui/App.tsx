@@ -1,23 +1,30 @@
-import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import {
-  History, Rgba, addFrame, addLayer, createSprite, drawLine, flattenFrame, floodFill, fromHex,
-  getCel, maskOfColor, replaceColors, similarColorPairs, toHex, usedColors, TRANSPARENT,
+  History, PixelImage, Rgba, Sprite, addAnimation, addFrame, addLayer, animationOf, createSprite, drawLine,
+  exportSpritesheet, flattenFrame, floodFill, fromHex, getCel, getFrame, importSpritesheet, maskOfColor,
+  replaceColors, similarColorPairs, toHex, usedColors, TRANSPARENT,
 } from '../core';
-import { downloadPng, paint } from './render';
+import { downloadPng, paint, readImageFile } from './render';
 
 type Tool = 'lapis' | 'borracha' | 'balde' | 'contagotas';
 type ColorScopeKind = 'camada' | 'frame' | 'tudo';
 
 const START_PALETTE = ['#000000', '#ffffff', '#c0392b', '#e67e22', '#f1c40f', '#27ae60', '#2980b9', '#8e44ad'].map(fromHex);
-const ZOOM = 16;
+
+function newDoc(sprite: Sprite) {
+  return { sprite, history: new History() };
+}
 
 export function App() {
-  const sprite = useMemo(() => createSprite(32, 32, START_PALETTE), []);
-  const history = useMemo(() => new History(), []);
+  const [doc, setDoc] = useState(() => newDoc(createSprite(32, 32, START_PALETTE)));
+  const { sprite, history } = doc;
   const [, refresh] = useReducer((n: number) => n + 1, 0);
 
   const [layerIdx, setLayerIdx] = useState(0);
-  const [frameIdx, setFrameIdx] = useState(0);
+  const [frameId, setFrameId] = useState(() => doc.sprite.frames[0].id);
+  const [cellW, setCellW] = useState(32);
+  const [cellH, setCellH] = useState(32);
+  const [importError, setImportError] = useState('');
   const [tool, setTool] = useState<Tool>('lapis');
   const [color, setColor] = useState<Rgba>(START_PALETTE[0]);
   const [highlightColor, setHighlightColor] = useState<Rgba | null>(null);
@@ -27,9 +34,11 @@ export function App() {
   const [playing, setPlaying] = useState(true);
   const [previewIdx, setPreviewIdx] = useState(0);
 
-  const layer = sprite.layers[layerIdx];
-  const frame = sprite.frames[frameIdx];
+  const layer = sprite.layers[Math.min(layerIdx, sprite.layers.length - 1)];
+  const frame = getFrame(sprite, frameId);
+  const anim = animationOf(sprite, frame.id)!;
   const cel = getCel(sprite, layer.id, frame.id);
+  const ZOOM = Math.max(2, Math.floor(512 / Math.max(sprite.width, sprite.height)));
 
   const scope = scopeKind === 'camada'
     ? { layerIds: [layer.id], frameIds: [frame.id] }
@@ -46,17 +55,31 @@ export function App() {
     if (editorRef.current) paint(editorRef.current, flat, highlight);
   });
 
-  // Preview em loop
+  // Preview em loop da animação (linha) atual
+  const previewFrameId = anim.frameIds[previewIdx % anim.frameIds.length];
   useEffect(() => {
     if (!playing) return;
-    const f = sprite.frames[previewIdx % sprite.frames.length];
-    const t = setTimeout(() => setPreviewIdx((i) => (i + 1) % sprite.frames.length), f.durationMs);
+    const f = getFrame(sprite, previewFrameId);
+    const t = setTimeout(() => setPreviewIdx((i) => (i + 1) % anim.frameIds.length), f.durationMs);
     return () => clearTimeout(t);
-  }, [playing, previewIdx, sprite.frames]);
+  }, [playing, previewIdx, previewFrameId, anim, sprite]);
   useEffect(() => {
-    const f = sprite.frames[previewIdx % sprite.frames.length];
-    if (previewRef.current) paint(previewRef.current, flattenFrame(sprite, f.id));
+    if (previewRef.current) paint(previewRef.current, flattenFrame(sprite, previewFrameId));
   });
+
+  const importSheet = async (file: File) => {
+    try {
+      const img: PixelImage = await readImageFile(file);
+      const s = importSpritesheet(img, { cellWidth: cellW, cellHeight: cellH, palette: sprite.palette });
+      setDoc(newDoc(s));
+      setLayerIdx(0);
+      setFrameId(s.frames[0].id);
+      setPreviewIdx(0);
+      setImportError('');
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : String(err));
+    }
+  };
 
   // Atalhos de desfazer/refazer
   useEffect(() => {
@@ -135,7 +158,18 @@ export function App() {
           ))}
           <button onClick={() => history.undo() && refresh()}>desfazer</button>
           <button onClick={() => history.redo() && refresh()}>refazer</button>
-          <button onClick={() => downloadPng(flat, 'sprite.png')}>exportar PNG</button>
+          <button onClick={() => downloadPng(flat, 'frame.png')}>exportar frame</button>
+          <button onClick={() => downloadPng(exportSpritesheet(sprite), 'spritesheet.png')}>exportar folha</button>
+        </div>
+        <div className="import">
+          quadro
+          <input type="number" min={1} value={cellW} onChange={(e) => setCellW(Number(e.target.value))} />
+          ×
+          <input type="number" min={1} value={cellH} onChange={(e) => setCellH(Number(e.target.value))} />
+          <label className="file">importar folha
+            <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) importSheet(f); e.target.value = ''; }} />
+          </label>
+          {importError && <span className="error">{importError}</span>}
         </div>
       </header>
 
@@ -195,13 +229,33 @@ export function App() {
         )}
       </aside>
 
+      <section className="sheet">
+        <h3>Spritesheet</h3>
+        {sprite.animations.map((a) => (
+          <div key={a.id} className={`row ${a === anim ? 'on' : ''}`}>
+            <input className="name" value={a.name} onChange={(e) => { a.name = e.target.value; refresh(); }} />
+            <div className="cells">
+              {a.frameIds.map((fid) => (
+                <FrameThumb key={fid} img={flattenFrame(sprite, fid)} active={fid === frame.id}
+                  onClick={() => { setFrameId(fid); setPreviewIdx(0); }} />
+              ))}
+              <button title="frame vazio" onClick={() => { const f = addFrame(sprite, 100, undefined, a); setFrameId(f.id); }}>+</button>
+              {a === anim && (
+                <button title="copiar o frame atual" onClick={() => { const f = addFrame(sprite, 100, frame, a); setFrameId(f.id); }}>+ cópia</button>
+              )}
+            </div>
+          </div>
+        ))}
+        <button onClick={() => { const a = addAnimation(sprite); setFrameId(a.frameIds[0]); setPreviewIdx(0); }}>+ linha (animação)</button>
+      </section>
+
       <main>
         <canvas ref={editorRef} className="editor" style={{ width: sprite.width * ZOOM, height: sprite.height * ZOOM }}
           onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} />
       </main>
 
       <aside className="right">
-        <h3>Preview</h3>
+        <h3>Preview: {anim.name}</h3>
         <canvas ref={previewRef} className="preview" style={{ width: sprite.width * 4, height: sprite.height * 4 }} />
         <button onClick={() => setPlaying((p) => !p)}>{playing ? 'pausar' : 'tocar'}</button>
 
@@ -218,26 +272,16 @@ export function App() {
         <button onClick={() => { addLayer(sprite); setLayerIdx(sprite.layers.length - 1); }}>+ camada</button>
       </aside>
 
-      <footer>
-        <div className="frames">
-          {sprite.frames.map((f, i) => (
-            <FrameThumb key={f.id} img={flattenFrame(sprite, f.id)} active={i === frameIdx} onClick={() => setFrameIdx(i)} label={i + 1} />
-          ))}
-          <button onClick={() => { addFrame(sprite, 100, frame); setFrameIdx(sprite.frames.length - 1); }}>+ frame (cópia)</button>
-          <button onClick={() => { addFrame(sprite); setFrameIdx(sprite.frames.length - 1); }}>+ frame vazio</button>
-        </div>
-      </footer>
     </div>
   );
 }
 
-function FrameThumb(props: { img: ReturnType<typeof flattenFrame>; active: boolean; onClick: () => void; label: number }) {
+function FrameThumb(props: { img: PixelImage; active: boolean; onClick: () => void }) {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => { if (ref.current) paint(ref.current, props.img); });
   return (
     <button className={`thumb ${props.active ? 'on' : ''}`} onClick={props.onClick}>
       <canvas ref={ref} />
-      <span>{props.label}</span>
     </button>
   );
 }

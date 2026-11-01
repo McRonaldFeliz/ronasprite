@@ -14,6 +14,16 @@ export interface Frame {
 }
 
 /**
+ * Uma animação é uma linha da spritesheet (ex.: "parado", "andar ↓").
+ * Ela guarda a ordem dos seus frames.
+ */
+export interface Animation {
+  id: string;
+  name: string;
+  frameIds: string[];
+}
+
+/**
  * Um sprite tem camadas (eixo vertical da linha do tempo) e frames (eixo horizontal).
  * Cada cruzamento camada x frame é uma "célula" com a sua própria imagem.
  */
@@ -25,6 +35,8 @@ export interface Sprite {
   /** Chave: `${layerId}:${frameId}` */
   cels: Map<string, PixelImage>;
   palette: Rgba[];
+  /** Linhas da spritesheet. Todo frame pertence a exatamente uma animação. */
+  animations: Animation[];
 }
 
 let nextId = 1;
@@ -33,9 +45,9 @@ const newId = (prefix: string) => `${prefix}${nextId++}`;
 export const celKey = (layerId: string, frameId: string) => `${layerId}:${frameId}`;
 
 export function createSprite(width: number, height: number, palette: Rgba[] = []): Sprite {
-  const sprite: Sprite = { width, height, layers: [], frames: [], cels: new Map(), palette: [...palette] };
-  addFrame(sprite);
+  const sprite: Sprite = { width, height, layers: [], frames: [], cels: new Map(), palette: [...palette], animations: [] };
   addLayer(sprite, 'Camada 1');
+  addAnimation(sprite, 'Animação 1');
   return sprite;
 }
 
@@ -46,14 +58,41 @@ export function addLayer(sprite: Sprite, name = `Camada ${sprite.layers.length +
   return layer;
 }
 
-export function addFrame(sprite: Sprite, durationMs = 100, copyFrom?: Frame): Frame {
+/** Cria uma nova linha (animação) com `frameCount` frames vazios. */
+export function addAnimation(sprite: Sprite, name = `Animação ${sprite.animations.length + 1}`, frameCount = 1): Animation {
+  const anim: Animation = { id: newId('A'), name, frameIds: [] };
+  sprite.animations.push(anim);
+  for (let i = 0; i < frameCount; i++) addFrame(sprite, 100, undefined, anim);
+  return anim;
+}
+
+/**
+ * Adiciona um frame no fim de uma animação (por padrão, a animação de `copyFrom`, ou a última).
+ * Com `copyFrom`, o frame novo começa como cópia dele.
+ */
+export function addFrame(sprite: Sprite, durationMs = 100, copyFrom?: Frame, animation?: Animation): Frame {
   const frame: Frame = { id: newId('F'), durationMs };
+  const anim = animation
+    ?? (copyFrom && animationOf(sprite, copyFrom.id))
+    ?? sprite.animations[sprite.animations.length - 1];
+  if (!anim) throw new Error('O sprite não tem nenhuma animação');
   sprite.frames.push(frame);
+  anim.frameIds.push(frame.id);
   for (const l of sprite.layers) {
     const src = copyFrom && sprite.cels.get(celKey(l.id, copyFrom.id));
     sprite.cels.set(celKey(l.id, frame.id), src ? src.clone() : new PixelImage(sprite.width, sprite.height));
   }
   return frame;
+}
+
+export function animationOf(sprite: Sprite, frameId: string): Animation | undefined {
+  return sprite.animations.find((a) => a.frameIds.includes(frameId));
+}
+
+export function getFrame(sprite: Sprite, frameId: string): Frame {
+  const f = sprite.frames.find((fr) => fr.id === frameId);
+  if (!f) throw new Error(`Frame não encontrado: ${frameId}`);
+  return f;
 }
 
 export function getCel(sprite: Sprite, layerId: string, frameId: string): PixelImage {
