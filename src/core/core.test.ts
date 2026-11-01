@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  History, createNewImage, snapSize, addFrame, addLayer, createSprite, drawLine, floodFill, flattenFrame, fromHex, getCel,
+  History, RONA64, createNewImage, snapSize, addFrame, addLayer, createSprite, drawLine, floodFill, flattenFrame, fromHex, getCel,
   maskOfColor, replaceColors, rgba, similarColorPairs, toHex, usedColors,
 } from './index';
 
@@ -143,5 +143,13 @@ describe('imagem nova em múltiplos de 16', () => {
   it('cria a imagem já ajustada', () => {
     const s = createNewImage(30, 50);
     expect([s.width, s.height]).toEqual([32, 48]);
+  });
+});
+
+describe('paleta padrão Rona64', () => {
+  it('tem 64 cores diferentes, todas opacas', () => {
+    expect(RONA64).toHaveLength(64);
+    expect(new Set(RONA64).size).toBe(64);
+    expect(RONA64.every((c) => c >>> 24 === 255)).toBe(true);
   });
 });

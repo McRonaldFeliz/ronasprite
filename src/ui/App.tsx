@@ -2,7 +2,7 @@ import { useEffect, useReducer, useRef, useState } from 'react';
 import {
   History, PixelImage, Rgba, Sprite, addAnimation, addFrame, addLayer, animationOf, createNewImage, snapSize, SIZE_STEP, MAX_NEW_SIZE, drawLine,
   exportSpritesheet, flattenFrame, floodFill, fromHex, getCel, getFrame, importSpritesheet, maskOfColor,
-  replaceColors, similarColorPairs, toHex, usedColors, TRANSPARENT,
+  replaceColors, similarColorPairs, RONA64, toHex, usedColors, TRANSPARENT,
 } from '../core';
 import { downloadPng, paint, readImageFile } from './render';
 import { Icon } from './icons';
@@ -11,7 +11,7 @@ type Tool = 'lapis' | 'borracha' | 'balde' | 'contagotas';
 const TOOL_NAMES: Record<Tool, string> = { lapis: 'Lápis', borracha: 'Borracha', balde: 'Balde de tinta', contagotas: 'Conta-gotas' };
 type ColorScopeKind = 'camada' | 'frame' | 'tudo';
 
-const START_PALETTE = ['#000000', '#ffffff', '#c0392b', '#e67e22', '#f1c40f', '#27ae60', '#2980b9', '#8e44ad'].map(fromHex);
+const START_PALETTE = [...RONA64];
 
 function newDoc(sprite: Sprite) {
   return { sprite, history: new History() };
@@ -199,7 +199,7 @@ export function App() {
       </header>
 
       <aside className="left">
-        <h3>Paleta</h3>
+        <h3>Paleta <small className="muted">Rona64</small></h3>
         <div className="swatches">
           {sprite.palette.map((c, i) => (
             <button key={i} className={`sw ${c === color ? 'on' : ''}`} style={{ background: toHex(c) }}

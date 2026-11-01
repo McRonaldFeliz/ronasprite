@@ -27,7 +27,9 @@ main { grid-area: m; display: grid; place-items: center; overflow: auto; }
 canvas { image-rendering: pixelated; }
 .editor { background: repeating-conic-gradient(#555 0 25%, #444 0 50%) 0 0 / 32px 32px; cursor: crosshair; touch-action: none; }
 .preview { background: #444; display: block; margin-bottom: 4px; }
-.swatches { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.swatches { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; margin-bottom: 6px; }
+.swatches .sw { width: 100%; height: auto; aspect-ratio: 1; }
+.muted { color: var(--texto); opacity: 0.6; font-weight: normal; font-size: 11px; }
 .sw { display: inline-block; width: 20px; height: 20px; padding: 0; border: 1px solid #000; }
 .used { list-style: none; padding: 0; }
 .used li { display: flex; align-items: center; gap: 6px; padding: 2px; }
