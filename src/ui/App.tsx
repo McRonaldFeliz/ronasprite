@@ -5,8 +5,10 @@ import {
   replaceColors, similarColorPairs, toHex, usedColors, TRANSPARENT,
 } from '../core';
 import { downloadPng, paint, readImageFile } from './render';
+import { Icon } from './icons';
 
 type Tool = 'lapis' | 'borracha' | 'balde' | 'contagotas';
+const TOOL_NAMES: Record<Tool, string> = { lapis: 'Lápis', borracha: 'Borracha', balde: 'Balde de tinta', contagotas: 'Conta-gotas' };
 type ColorScopeKind = 'camada' | 'frame' | 'tudo';
 
 const START_PALETTE = ['#000000', '#ffffff', '#c0392b', '#e67e22', '#f1c40f', '#27ae60', '#2980b9', '#8e44ad'].map(fromHex);
@@ -165,13 +167,16 @@ export function App() {
       <header>
         <strong>Ronasprite</strong>
         <div className="tools">
-          {(['lapis', 'borracha', 'balde', 'contagotas'] as Tool[]).map((t) => (
-            <button key={t} className={t === tool ? 'on' : ''} onClick={() => setTool(t)}>{t}</button>
+          {(Object.keys(TOOL_NAMES) as Tool[]).map((t) => (
+            <button key={t} className={`icon ${t === tool ? 'on' : ''}`} title={TOOL_NAMES[t]} aria-label={TOOL_NAMES[t]}
+              onClick={() => setTool(t)}><Icon name={t} /></button>
           ))}
-          <button onClick={() => history.undo() && refresh()}>desfazer</button>
-          <button onClick={() => history.redo() && refresh()}>refazer</button>
-          <button onClick={() => downloadPng(flat, 'frame.png')}>exportar frame</button>
-          <button onClick={() => downloadPng(exportSpritesheet(sprite), 'spritesheet.png')}>exportar folha</button>
+          <span className="sep" />
+          <button className="icon" title="Desfazer (Ctrl+Z)" aria-label="Desfazer" onClick={() => history.undo() && refresh()}><Icon name="desfazer" /></button>
+          <button className="icon" title="Refazer (Ctrl+Shift+Z)" aria-label="Refazer" onClick={() => history.redo() && refresh()}><Icon name="refazer" /></button>
+          <span className="sep" />
+          <button className="icon" title="Exportar frame (PNG)" aria-label="Exportar frame" onClick={() => downloadPng(flat, 'frame.png')}><Icon name="exportarFrame" /></button>
+          <button className="icon" title="Exportar spritesheet (PNG)" aria-label="Exportar spritesheet" onClick={() => downloadPng(exportSpritesheet(sprite), 'spritesheet.png')}><Icon name="exportarFolha" /></button>
         </div>
         <div className="new-image">
           <SizeInput value={newW} onChange={setNewW} />

@@ -49,3 +49,6 @@ label { display: block; margin: 4px 0; }
 .file { margin: 0; background: var(--amarelo); color: var(--roxo-escuro); padding: 3px 8px; border-radius: 4px; cursor: pointer; }
 .file input { display: none; }
 .error { color: #ff8080; }
+button.icon { display: inline-grid; place-items: center; width: 34px; height: 34px; padding: 0; }
+.tools { align-items: center; }
+.sep { width: 1px; height: 24px; background: var(--roxo-borda); margin: 0 4px; }
