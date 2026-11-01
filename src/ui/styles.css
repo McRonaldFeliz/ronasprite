@@ -44,7 +44,8 @@ label { display: block; margin: 4px 0; }
 .thumb { padding: 2px; line-height: 0; }
 .thumb canvas { height: 48px; width: auto; background: #444; }
 .import { display: flex; gap: 6px; align-items: center; margin-left: auto; }
-.import input[type=number] { width: 48px; background: var(--roxo-claro); color: var(--texto); border: 1px solid var(--roxo-borda); }
+.new-image { display: flex; gap: 6px; align-items: center; }
+.new-image input[type=number], .import input[type=number] { width: 48px; background: var(--roxo-claro); color: var(--texto); border: 1px solid var(--roxo-borda); }
 .file { margin: 0; background: var(--amarelo); color: var(--roxo-escuro); padding: 3px 8px; border-radius: 4px; cursor: pointer; }
 .file input { display: none; }
 .error { color: #ff8080; }

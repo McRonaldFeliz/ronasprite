@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  History, addFrame, addLayer, createSprite, drawLine, floodFill, flattenFrame, fromHex, getCel,
+  History, createNewImage, snapSize, addFrame, addLayer, createSprite, drawLine, floodFill, flattenFrame, fromHex, getCel,
   maskOfColor, replaceColors, rgba, similarColorPairs, toHex, usedColors,
 } from './index';
 
@@ -133,5 +133,15 @@ describe('ferramentas e histórico', () => {
     expect(flattenFrame(s, s.frames[0].id).get(0, 0)).toBe(BLACK);
     top.visible = false;
     expect(flattenFrame(s, s.frames[0].id).get(0, 0)).toBe(WHITE);
+  });
+});
+
+describe('imagem nova em múltiplos de 16', () => {
+  it('arredonda para o múltiplo de 16 mais próximo, entre 16 e 1024', () => {
+    expect([0, 7, 9, 16, 20, 24, 33, 100, 5000].map(snapSize)).toEqual([16, 16, 16, 16, 16, 32, 32, 96, 1024]);
+  });
+  it('cria a imagem já ajustada', () => {
+    const s = createNewImage(30, 50);
+    expect([s.width, s.height]).toEqual([32, 48]);
   });
 });

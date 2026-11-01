@@ -39,6 +39,21 @@ export interface Sprite {
   animations: Animation[];
 }
 
+/** Tamanho base das imagens novas: sempre múltiplos de 16 pixels. */
+export const SIZE_STEP = 16;
+export const MAX_NEW_SIZE = 1024;
+
+/** Arredonda um tamanho para o múltiplo de 16 mais próximo (mínimo 16, máximo 1024). */
+export function snapSize(n: number): number {
+  if (!Number.isFinite(n)) return SIZE_STEP;
+  return Math.min(MAX_NEW_SIZE, Math.max(SIZE_STEP, Math.round(n / SIZE_STEP) * SIZE_STEP));
+}
+
+/** Cria uma imagem nova com largura e altura em múltiplos de 16. */
+export function createNewImage(width: number, height: number, palette: Rgba[] = []): Sprite {
+  return createSprite(snapSize(width), snapSize(height), palette);
+}
+
 let nextId = 1;
 const newId = (prefix: string) => `${prefix}${nextId++}`;
 

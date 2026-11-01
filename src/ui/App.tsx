@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useRef, useState } from 'react';
 import {
-  History, PixelImage, Rgba, Sprite, addAnimation, addFrame, addLayer, animationOf, createSprite, drawLine,
+  History, PixelImage, Rgba, Sprite, addAnimation, addFrame, addLayer, animationOf, createNewImage, snapSize, SIZE_STEP, MAX_NEW_SIZE, drawLine,
   exportSpritesheet, flattenFrame, floodFill, fromHex, getCel, getFrame, importSpritesheet, maskOfColor,
   replaceColors, similarColorPairs, toHex, usedColors, TRANSPARENT,
 } from '../core';
@@ -16,12 +16,14 @@ function newDoc(sprite: Sprite) {
 }
 
 export function App() {
-  const [doc, setDoc] = useState(() => newDoc(createSprite(32, 32, START_PALETTE)));
+  const [doc, setDoc] = useState(() => newDoc(createNewImage(16, 16, START_PALETTE)));
   const { sprite, history } = doc;
   const [, refresh] = useReducer((n: number) => n + 1, 0);
 
   const [layerIdx, setLayerIdx] = useState(0);
   const [frameId, setFrameId] = useState(() => doc.sprite.frames[0].id);
+  const [newW, setNewW] = useState(16);
+  const [newH, setNewH] = useState(16);
   const [cellW, setCellW] = useState(32);
   const [cellH, setCellH] = useState(32);
   const [importError, setImportError] = useState('');
@@ -66,6 +68,16 @@ export function App() {
   useEffect(() => {
     if (previewRef.current) paint(previewRef.current, flattenFrame(sprite, previewFrameId));
   });
+
+  const newImage = () => {
+    const s = createNewImage(newW, newH, sprite.palette);
+    setNewW(s.width);
+    setNewH(s.height);
+    setDoc(newDoc(s));
+    setLayerIdx(0);
+    setFrameId(s.frames[0].id);
+    setPreviewIdx(0);
+  };
 
   const importSheet = async (file: File) => {
     try {
@@ -160,6 +172,13 @@ export function App() {
           <button onClick={() => history.redo() && refresh()}>refazer</button>
           <button onClick={() => downloadPng(flat, 'frame.png')}>exportar frame</button>
           <button onClick={() => downloadPng(exportSpritesheet(sprite), 'spritesheet.png')}>exportar folha</button>
+        </div>
+        <div className="new-image">
+          <SizeInput value={newW} onChange={setNewW} />
+          ×
+          <SizeInput value={newH} onChange={setNewH} />
+          <button onClick={newImage}>nova imagem</button>
+          <datalist id="tamanhos16">{SIZE_OPTIONS.map((n) => <option key={n} value={n} />)}</datalist>
         </div>
         <div className="import">
           quadro
@@ -273,6 +292,21 @@ export function App() {
       </aside>
 
     </div>
+  );
+}
+
+const SIZE_OPTIONS = Array.from({ length: 512 / SIZE_STEP }, (_, i) => (i + 1) * SIZE_STEP);
+
+/** Escolha de tamanho sempre em múltiplos de 16. Aceita digitar outro múltiplo; o valor é ajustado ao sair do campo. */
+function SizeInput(props: { value: number; onChange: (n: number) => void }) {
+  const [text, setText] = useState(String(props.value));
+  useEffect(() => setText(String(props.value)), [props.value]);
+  return (
+    <>
+      <input type="number" list="tamanhos16" min={SIZE_STEP} max={MAX_NEW_SIZE} step={SIZE_STEP} value={text}
+        onChange={(e) => setText(e.target.value)}
+        onBlur={() => { const n = snapSize(Number(text)); setText(String(n)); props.onChange(n); }} />
+    </>
   );
 }
 

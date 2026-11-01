@@ -23,6 +23,7 @@ npm run build   # gera a versão final em dist/
 
 ## O que já funciona
 
+- Imagem nova sempre em múltiplos de 16 pixels (16x16 por padrão; outros valores são ajustados pro múltiplo mais próximo).
 - Lápis, borracha, balde e conta-gotas. Desfazer com Ctrl+Z e refazer com Ctrl+Shift+Z.
 - Paleta editável.
 - Painel **Cores da imagem**: mostra todas as cores usadas e quantos pixels cada uma tem. Clicar numa cor destaca os pixels dela e permite trocar a cor. Também junta cores quase iguais.
