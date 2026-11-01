@@ -4,3 +4,5 @@ export * from './sprite';
 export * from './palette-tools';
 export * from './tools';
 export * from './history';
+export * from './spritesheet';
+export * from './palettes';

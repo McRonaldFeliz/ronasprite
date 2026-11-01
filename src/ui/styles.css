@@ -17,18 +17,25 @@ li.on { outline: 2px solid var(--amarelo); }
 header strong { color: var(--amarelo); font-size: 16px; }
 h3 { color: var(--amarelo); }
 input[type=range], input[type=checkbox] { accent-color: var(--amarelo); }
-.app { display: grid; height: 100vh; grid-template: 'h h h' auto 'l m r' 1fr 'f f f' auto / 260px 1fr 220px; }
-header { grid-area: h; display: flex; gap: 16px; align-items: center; padding: 8px; border-bottom: 1px solid var(--roxo-borda); background: var(--roxo); }
+.app { display: grid; height: 100vh; grid-template: 'h h h h' auto 'l s m r' 1fr / 250px minmax(280px, 1fr) minmax(400px, 1.4fr) 200px; }
+.app.sheet-min { grid-template-columns: 250px 36px 1fr 200px; }
+.sheet-min .sheet { padding: 8px 4px; }
+.restore { width: 26px; height: 26px; font-size: 16px; }
+header { grid-area: h; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; padding: 8px; border-bottom: 1px solid var(--roxo-borda); background: var(--roxo); }
 .tools { display: flex; gap: 4px; flex-wrap: wrap; }
 aside { padding: 8px; overflow: auto; border-color: var(--roxo-borda); background: var(--roxo); }
 .left { grid-area: l; border-right: 1px solid var(--roxo-borda); }
 .right { grid-area: r; border-left: 1px solid var(--roxo-borda); }
-main { grid-area: m; display: grid; place-items: center; overflow: auto; }
-footer { grid-area: f; border-top: 1px solid var(--roxo-borda); background: var(--roxo); padding: 8px; overflow-x: auto; }
+main { grid-area: m; position: relative; display: grid; place-items: center; overflow: auto; }
 canvas { image-rendering: pixelated; }
 .editor { background: repeating-conic-gradient(#555 0 25%, #444 0 50%) 0 0 / 32px 32px; cursor: crosshair; touch-action: none; }
 .preview { background: #444; display: block; margin-bottom: 4px; }
-.swatches { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.swatches { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; margin-bottom: 6px; }
+.swatches.big { grid-template-columns: repeat(16, 1fr); gap: 1px; }
+.swatches.big .sw { border: none; border-radius: 1px; }
+.swatches.big .sw.on { outline: 2px solid var(--amarelo); outline-offset: 0; position: relative; z-index: 1; }
+.swatches .sw { width: 100%; height: auto; aspect-ratio: 1; }
+.muted { color: var(--texto); opacity: 0.6; font-weight: normal; font-size: 11px; }
 .sw { display: inline-block; width: 20px; height: 20px; padding: 0; border: 1px solid #000; }
 .used { list-style: none; padding: 0; }
 .used li { display: flex; align-items: center; gap: 6px; padding: 2px; }
@@ -37,6 +44,28 @@ label { display: block; margin: 4px 0; }
 .replace, .similar { margin-top: 8px; padding: 6px; background: var(--roxo-claro); border-radius: 4px; }
 .layers { list-style: none; padding: 0; }
 .layers li { padding: 3px; cursor: pointer; }
-.frames { display: flex; gap: 6px; align-items: center; }
-.thumb { display: flex; flex-direction: column; align-items: center; padding: 2px; }
-.thumb canvas { width: 48px; height: 48px; background: #444; }
+.sheet { grid-area: s; position: relative; padding: 8px; overflow: auto; border-right: 1px solid var(--roxo-borda); }
+.sheet .row { margin-bottom: 8px; padding: 4px; border-radius: 4px; }
+.sheet .row.on { background: var(--roxo-claro); }
+.sheet .name { background: transparent; color: var(--texto); border: none; border-bottom: 1px dashed var(--roxo-borda); margin-bottom: 4px; }
+.cells { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.thumb { padding: 2px; line-height: 0; }
+.thumb canvas { height: 48px; width: auto; background: #444; }
+.import { display: flex; gap: 6px; align-items: center; margin-left: auto; }
+.new-image { display: flex; gap: 6px; align-items: center; }
+.new-image input[type=number], .import input[type=number] { width: 48px; background: var(--roxo-claro); color: var(--texto); border: 1px solid var(--roxo-borda); }
+.file { margin: 0; background: var(--amarelo); color: var(--roxo-escuro); padding: 3px 8px; border-radius: 4px; cursor: pointer; }
+.file input { display: none; }
+.error { color: #ff8080; }
+button.icon { display: inline-grid; place-items: center; width: 34px; height: 34px; padding: 0; }
+.tools { align-items: center; }
+.sep { width: 1px; height: 24px; background: var(--roxo-borda); margin: 0 4px; }
+.panel-title { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+button.small { font-size: 11px; padding: 2px 6px; }
+.image-colors { position: relative; margin-top: 8px; border: 2px solid var(--amarelo); border-radius: 6px; padding: 6px; }
+.image-colors .used li button:not(.sw) { padding: 2px 5px; font-size: 11px; }
+.image-colors .used li span { font-size: 11px; }
+p.muted { margin: 0; font-size: 12px; }
+.win-btn { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; padding: 0; line-height: 1; font-size: 14px;
+  display: grid; place-items: center; }
+.win-btn:hover { background: var(--amarelo); color: var(--roxo-escuro); }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  History, addFrame, addLayer, createSprite, drawLine, floodFill, flattenFrame, fromHex, getCel,
+  History, RONA64, RONA256, createNewImage, snapSize, addFrame, addLayer, createSprite, drawLine, floodFill, flattenFrame, fromHex, getCel,
   maskOfColor, replaceColors, rgba, similarColorPairs, toHex, usedColors,
 } from './index';
 
@@ -133,5 +133,31 @@ describe('ferramentas e histórico', () => {
     expect(flattenFrame(s, s.frames[0].id).get(0, 0)).toBe(BLACK);
     top.visible = false;
     expect(flattenFrame(s, s.frames[0].id).get(0, 0)).toBe(WHITE);
+  });
+});
+
+describe('imagem nova em múltiplos de 16', () => {
+  it('arredonda para o múltiplo de 16 mais próximo, entre 16 e 1024', () => {
+    expect([0, 7, 9, 16, 20, 24, 33, 100, 5000].map(snapSize)).toEqual([16, 16, 16, 16, 16, 32, 32, 96, 1024]);
+  });
+  it('cria a imagem já ajustada', () => {
+    const s = createNewImage(30, 50);
+    expect([s.width, s.height]).toEqual([32, 48]);
+  });
+});
+
+describe('paleta padrão Rona64', () => {
+  it('tem 64 cores diferentes, todas opacas', () => {
+    expect(RONA64).toHaveLength(64);
+    expect(new Set(RONA64).size).toBe(64);
+    expect(RONA64.every((c) => c >>> 24 === 255)).toBe(true);
+  });
+});
+
+describe('paleta padrão Rona256', () => {
+  it('tem 256 cores diferentes, todas opacas', () => {
+    expect(RONA256).toHaveLength(256);
+    expect(new Set(RONA256).size).toBe(256);
+    expect(RONA256.every((c) => c >>> 24 === 255)).toBe(true);
   });
 });
