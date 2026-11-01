@@ -197,10 +197,10 @@ export function App() {
         </label>
         <ul className="used">
           {used.map(({ color: c, count }) => (
-            <li key={c} className={c === highlightColor ? 'on' : ''}>
+            <li key={c} className={c === highlightColor ? 'on' : ''} title={toHex(c)}>
               <button className="sw" style={{ background: toHex(c) }}
-                onClick={() => setHighlightColor(c === highlightColor ? null : c)} title="destacar no desenho" />
-              <span>{toHex(c)} · {count}px</span>
+                onClick={() => setHighlightColor(c === highlightColor ? null : c)} title={`${toHex(c)} · clique para destacar`} />
+              <span>{count}px</span>
               <button onClick={() => setColor(c)} title="usar esta cor">usar</button>
               {!sprite.palette.includes(c) && (
                 <button onClick={() => { sprite.palette.push(c); refresh(); }} title="mandar para a paleta">+paleta</button>
@@ -210,8 +210,8 @@ export function App() {
         </ul>
         {highlightColor !== null && (
           <div className="replace">
-            Trocar {toHex(highlightColor)} por{' '}
-            <input type="color" value={replaceTo} onChange={(e) => setReplaceTo(e.target.value)} />
+            Trocar <span className="sw" style={{ background: toHex(highlightColor) }} title={toHex(highlightColor)} /> por{' '}
+            <input type="color" title={replaceTo} value={replaceTo} onChange={(e) => setReplaceTo(e.target.value)} />
             <button onClick={() => doReplace(highlightColor)}>trocar</button>
           </div>
         )}
@@ -220,8 +220,8 @@ export function App() {
             <h4>Cores quase iguais</h4>
             {similar.map(([a, b]) => (
               <div key={`${a.color}-${b.color}`}>
-                <span className="sw" style={{ background: toHex(a.color) }} />
-                <span className="sw" style={{ background: toHex(b.color) }} />
+                <span className="sw" style={{ background: toHex(a.color) }} title={toHex(a.color)} />
+                <span className="sw" style={{ background: toHex(b.color) }} title={toHex(b.color)} />
                 <button onClick={() => mergeSimilar(a.color, b.color)}>juntar</button>
               </div>
             ))}
