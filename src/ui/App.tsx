@@ -35,6 +35,7 @@ export function App() {
   const [replaceTo, setReplaceTo] = useState('#c0392b');
   const [scopeKind, setScopeKind] = useState<ColorScopeKind>('tudo');
   const [tolerance, setTolerance] = useState(0);
+  const [showCounts, setShowCounts] = useState(false);
   const [playing, setPlaying] = useState(true);
   const [previewIdx, setPreviewIdx] = useState(0);
 
@@ -207,7 +208,13 @@ export function App() {
         </div>
         <input type="color" value={toHex(color).slice(0, 7)} onChange={(e) => setColor(fromHex(e.target.value))} />
 
-        <h3>Cores da imagem</h3>
+        <div className="panel-title">
+          <h3>Cores da imagem</h3>
+          <button className={`small ${showCounts ? 'on' : ''}`} onClick={() => setShowCounts((v) => !v)}
+            title={showCounts ? 'Esconder quantos pixels tem cada cor' : 'Mostrar quantos pixels tem cada cor'}>
+            nº de pixels
+          </button>
+        </div>
         <label>Onde:{' '}
           <select value={scopeKind} onChange={(e) => setScopeKind(e.target.value as ColorScopeKind)}>
             <option value="tudo">sprite inteiro</option>
@@ -224,7 +231,7 @@ export function App() {
             <li key={c} className={c === highlightColor ? 'on' : ''} title={toHex(c)}>
               <button className="sw" style={{ background: toHex(c) }}
                 onClick={() => setHighlightColor(c === highlightColor ? null : c)} title={`${toHex(c)} · clique para destacar`} />
-              <span>{count}px</span>
+              <span>{showCounts && `${count} ${count === 1 ? "pixel" : "pixels"}`}</span>
               <button onClick={() => setColor(c)} title="usar esta cor">usar</button>
               {!sprite.palette.includes(c) && (
                 <button onClick={() => { sprite.palette.push(c); refresh(); }} title="mandar para a paleta">+paleta</button>
