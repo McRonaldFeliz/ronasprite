@@ -41,6 +41,7 @@ export function App() {
   const [scopeKind, setScopeKind] = useState<ColorScopeKind>('tudo');
   const [tolerance, setTolerance] = useState(0);
   const [imageColorsOpen, setImageColorsOpen] = useState(false);
+  const [sheetMin, setSheetMin] = useState(false);
   const [recent, setRecent] = useState<Rgba[]>([]);
   const [playing, setPlaying] = useState(true);
   const [previewIdx, setPreviewIdx] = useState(0);
@@ -171,7 +172,7 @@ export function App() {
   };
 
   return (
-    <div className="app">
+    <div className={`app ${sheetMin ? 'sheet-min' : ''}`}>
       <header>
         <strong>Ronasprite</strong>
         <div className="tools">
@@ -284,7 +285,13 @@ export function App() {
       </aside>
 
       <section className="sheet">
-        <h3>Spritesheet</h3>
+        {sheetMin ? (
+          <button className="small restore" title="Mostrar spritesheet" aria-label="Mostrar spritesheet" onClick={() => setSheetMin(false)}>+</button>
+        ) : (<>
+        <div className="panel-title">
+          <h3>Spritesheet</h3>
+          <button className="small" title="Minimizar spritesheet" aria-label="Minimizar spritesheet" onClick={() => setSheetMin(true)}>−</button>
+        </div>
         {sprite.animations.map((a) => (
           <div key={a.id} className={`row ${a === anim ? 'on' : ''}`}>
             <input className="name" value={a.name} onChange={(e) => { a.name = e.target.value; refresh(); }} />
@@ -301,6 +308,7 @@ export function App() {
           </div>
         ))}
         <button onClick={() => { const a = addAnimation(sprite); setFrameId(a.frameIds[0]); setPreviewIdx(0); }}>+ linha (animação)</button>
+        </>)}
       </section>
 
       <main>

@@ -18,6 +18,9 @@ header strong { color: var(--amarelo); font-size: 16px; }
 h3 { color: var(--amarelo); }
 input[type=range], input[type=checkbox] { accent-color: var(--amarelo); }
 .app { display: grid; height: 100vh; grid-template: 'h h h h' auto 'l s m r' 1fr / 250px minmax(280px, 1fr) minmax(400px, 1.4fr) 200px; }
+.app.sheet-min { grid-template-columns: 250px 36px 1fr 200px; }
+.sheet-min .sheet { padding: 8px 4px; }
+.restore { width: 26px; height: 26px; font-size: 16px; }
 header { grid-area: h; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; padding: 8px; border-bottom: 1px solid var(--roxo-borda); background: var(--roxo); }
 .tools { display: flex; gap: 4px; flex-wrap: wrap; }
 aside { padding: 8px; overflow: auto; border-color: var(--roxo-borda); background: var(--roxo); }
