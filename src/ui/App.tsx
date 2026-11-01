@@ -223,7 +223,7 @@ export function App() {
           <div className="image-colors">
             <div className="panel-title">
               <h3>Cores da imagem</h3>
-              <button className="small" title="Fechar" aria-label="Fechar" onClick={closeImageColors}>✕</button>
+              <button className="win-btn" title="Fechar" aria-label="Fechar" onClick={closeImageColors}>✕</button>
             </div>
             <label>Onde:{' '}
               <select value={scopeKind} onChange={(e) => setScopeKind(e.target.value as ColorScopeKind)}>
@@ -288,10 +288,8 @@ export function App() {
         {sheetMin ? (
           <button className="small restore" title="Mostrar spritesheet" aria-label="Mostrar spritesheet" onClick={() => setSheetMin(false)}>+</button>
         ) : (<>
-        <div className="panel-title">
-          <h3>Spritesheet</h3>
-          <button className="small" title="Minimizar spritesheet" aria-label="Minimizar spritesheet" onClick={() => setSheetMin(true)}>−</button>
-        </div>
+        <button className="win-btn" title="Minimizar spritesheet" aria-label="Minimizar spritesheet" onClick={() => setSheetMin(true)}>−</button>
+        <h3>Spritesheet</h3>
         {sprite.animations.map((a) => (
           <div key={a.id} className={`row ${a === anim ? 'on' : ''}`}>
             <input className="name" value={a.name} onChange={(e) => { a.name = e.target.value; refresh(); }} />
