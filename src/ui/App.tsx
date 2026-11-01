@@ -218,41 +218,8 @@ export function App() {
         </div>
         <input type="color" value={toHex(color).slice(0, 7)} onChange={(e) => setColor(fromHex(e.target.value))} />
 
-
-        <h3>Cores escolhidas</h3>
-        {recent.length === 0
-          ? <p className="muted">As cores que você usar aparecem aqui.</p>
-          : <div className="swatches">
-              {recent.map((c) => (
-                <button key={c} className={`sw ${c === color ? 'on' : ''}`} style={{ background: toHex(c) }}
-                  title={toHex(c)} onClick={() => setColor(c)} />
-              ))}
-            </div>}
-      </aside>
-
-      <section className="sheet">
-        <h3>Spritesheet</h3>
-        {sprite.animations.map((a) => (
-          <div key={a.id} className={`row ${a === anim ? 'on' : ''}`}>
-            <input className="name" value={a.name} onChange={(e) => { a.name = e.target.value; refresh(); }} />
-            <div className="cells">
-              {a.frameIds.map((fid) => (
-                <FrameThumb key={fid} img={flattenFrame(sprite, fid)} active={fid === frame.id}
-                  onClick={() => { setFrameId(fid); setPreviewIdx(0); }} />
-              ))}
-              <button title="frame vazio" onClick={() => { const f = addFrame(sprite, 100, undefined, a); setFrameId(f.id); }}>+</button>
-              {a === anim && (
-                <button title="copiar o frame atual" onClick={() => { const f = addFrame(sprite, 100, frame, a); setFrameId(f.id); }}>+ cópia</button>
-              )}
-            </div>
-          </div>
-        ))}
-        <button onClick={() => { const a = addAnimation(sprite); setFrameId(a.frameIds[0]); setPreviewIdx(0); }}>+ linha (animação)</button>
-      </section>
-
-      <main>
-        {imageColorsOpen && (
-          <div className="floating">
+        {imageColorsOpen ? (
+          <div className="image-colors">
             <div className="panel-title">
               <h3>Cores da imagem</h3>
               <button className="small" title="Fechar" aria-label="Fechar" onClick={closeImageColors}>✕</button>
@@ -301,7 +268,42 @@ export function App() {
               </div>
             )}
           </div>
+        ) : (
+          <>
+        <h3>Cores escolhidas</h3>
+        {recent.length === 0
+          ? <p className="muted">As cores que você usar aparecem aqui.</p>
+          : <div className="swatches">
+              {recent.map((c) => (
+                <button key={c} className={`sw ${c === color ? 'on' : ''}`} style={{ background: toHex(c) }}
+                  title={toHex(c)} onClick={() => setColor(c)} />
+              ))}
+            </div>}
+          </>
         )}
+      </aside>
+
+      <section className="sheet">
+        <h3>Spritesheet</h3>
+        {sprite.animations.map((a) => (
+          <div key={a.id} className={`row ${a === anim ? 'on' : ''}`}>
+            <input className="name" value={a.name} onChange={(e) => { a.name = e.target.value; refresh(); }} />
+            <div className="cells">
+              {a.frameIds.map((fid) => (
+                <FrameThumb key={fid} img={flattenFrame(sprite, fid)} active={fid === frame.id}
+                  onClick={() => { setFrameId(fid); setPreviewIdx(0); }} />
+              ))}
+              <button title="frame vazio" onClick={() => { const f = addFrame(sprite, 100, undefined, a); setFrameId(f.id); }}>+</button>
+              {a === anim && (
+                <button title="copiar o frame atual" onClick={() => { const f = addFrame(sprite, 100, frame, a); setFrameId(f.id); }}>+ cópia</button>
+              )}
+            </div>
+          </div>
+        ))}
+        <button onClick={() => { const a = addAnimation(sprite); setFrameId(a.frameIds[0]); setPreviewIdx(0); }}>+ linha (animação)</button>
+      </section>
+
+      <main>
         <canvas ref={editorRef} className="editor" style={{ width: sprite.width * ZOOM, height: sprite.height * ZOOM }}
           onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} />
       </main>

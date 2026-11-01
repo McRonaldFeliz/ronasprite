@@ -56,6 +56,7 @@ button.icon { display: inline-grid; place-items: center; width: 34px; height: 34
 .sep { width: 1px; height: 24px; background: var(--roxo-borda); margin: 0 4px; }
 .panel-title { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 button.small { font-size: 11px; padding: 2px 6px; }
-.floating { position: absolute; top: 8px; left: 8px; z-index: 10; width: 280px; max-height: calc(100% - 16px); overflow: auto;
-  background: var(--roxo); border: 2px solid var(--amarelo); border-radius: 6px; padding: 8px; box-shadow: 0 6px 24px rgba(0,0,0,.5); }
+.image-colors { margin-top: 8px; border: 2px solid var(--amarelo); border-radius: 6px; padding: 6px; }
+.image-colors .used li button:not(.sw) { padding: 2px 5px; font-size: 11px; }
+.image-colors .used li span { font-size: 11px; }
 p.muted { margin: 0; font-size: 12px; }
