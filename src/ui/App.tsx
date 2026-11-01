@@ -30,12 +30,18 @@ export function App() {
   const [cellH, setCellH] = useState(32);
   const [importError, setImportError] = useState('');
   const [tool, setTool] = useState<Tool>('lapis');
-  const [color, setColor] = useState<Rgba>(START_PALETTE[0]);
+  const [color, setColorState] = useState<Rgba>(START_PALETTE[0]);
+  /** Escolhe a cor de desenho e guarda em "Cores escolhidas" (as 16 mais recentes). */
+  const setColor = (c: Rgba) => {
+    setColorState(c);
+    setRecent((r) => [c, ...r.filter((x) => x !== c)].slice(0, 16));
+  };
   const [highlightColor, setHighlightColor] = useState<Rgba | null>(null);
   const [replaceTo, setReplaceTo] = useState('#c0392b');
   const [scopeKind, setScopeKind] = useState<ColorScopeKind>('tudo');
   const [tolerance, setTolerance] = useState(0);
-  const [showCounts, setShowCounts] = useState(false);
+  const [imageColorsOpen, setImageColorsOpen] = useState(false);
+  const [recent, setRecent] = useState<Rgba[]>([]);
   const [playing, setPlaying] = useState(true);
   const [previewIdx, setPreviewIdx] = useState(0);
 
@@ -144,8 +150,9 @@ export function App() {
     refresh();
   };
 
-  const used = usedColors(sprite, scope);
-  const similar = similarColorPairs(used);
+  const used = imageColorsOpen ? usedColors(sprite, scope) : [];
+  const similar = imageColorsOpen ? similarColorPairs(used) : [];
+  const closeImageColors = () => { setImageColorsOpen(false); setHighlightColor(null); };
 
   const doReplace = (from: Rgba) => {
     const cels = [...sprite.cels.values()];
@@ -175,6 +182,9 @@ export function App() {
           <span className="sep" />
           <button className="icon" title="Desfazer (Ctrl+Z)" aria-label="Desfazer" onClick={() => history.undo() && refresh()}><Icon name="desfazer" /></button>
           <button className="icon" title="Refazer (Ctrl+Shift+Z)" aria-label="Refazer" onClick={() => history.redo() && refresh()}><Icon name="refazer" /></button>
+          <span className="sep" />
+          <button className={`icon ${imageColorsOpen ? 'on' : ''}`} title="Cores da imagem" aria-label="Cores da imagem"
+            onClick={() => (imageColorsOpen ? closeImageColors() : setImageColorsOpen(true))}><Icon name="coresImagem" /></button>
           <span className="sep" />
           <button className="icon" title="Exportar frame (PNG)" aria-label="Exportar frame" onClick={() => downloadPng(flat, 'frame.png')}><Icon name="exportarFrame" /></button>
           <button className="icon" title="Exportar spritesheet (PNG)" aria-label="Exportar spritesheet" onClick={() => downloadPng(exportSpritesheet(sprite), 'spritesheet.png')}><Icon name="exportarFolha" /></button>
@@ -208,56 +218,16 @@ export function App() {
         </div>
         <input type="color" value={toHex(color).slice(0, 7)} onChange={(e) => setColor(fromHex(e.target.value))} />
 
-        <div className="panel-title">
-          <h3>Cores da imagem</h3>
-          <button className={`small ${showCounts ? 'on' : ''}`} onClick={() => setShowCounts((v) => !v)}
-            title={showCounts ? 'Esconder quantos pixels tem cada cor' : 'Mostrar quantos pixels tem cada cor'}>
-            nº de pixels
-          </button>
-        </div>
-        <label>Onde:{' '}
-          <select value={scopeKind} onChange={(e) => setScopeKind(e.target.value as ColorScopeKind)}>
-            <option value="tudo">sprite inteiro</option>
-            <option value="frame">frame atual</option>
-            <option value="camada">camada atual (neste frame)</option>
-          </select>
-        </label>
-        <label>Tolerância: {Math.round(tolerance * 100)}%
-          <input type="range" min={0} max={0.3} step={0.01} value={tolerance}
-            onChange={(e) => setTolerance(Number(e.target.value))} />
-        </label>
-        <ul className="used">
-          {used.map(({ color: c, count }) => (
-            <li key={c} className={c === highlightColor ? 'on' : ''} title={toHex(c)}>
-              <button className="sw" style={{ background: toHex(c) }}
-                onClick={() => setHighlightColor(c === highlightColor ? null : c)} title={`${toHex(c)} · clique para destacar`} />
-              <span>{showCounts && `${count} ${count === 1 ? "pixel" : "pixels"}`}</span>
-              <button onClick={() => setColor(c)} title="usar esta cor">usar</button>
-              {!sprite.palette.includes(c) && (
-                <button onClick={() => { sprite.palette.push(c); refresh(); }} title="mandar para a paleta">+paleta</button>
-              )}
-            </li>
-          ))}
-        </ul>
-        {highlightColor !== null && (
-          <div className="replace">
-            Trocar <span className="sw" style={{ background: toHex(highlightColor) }} title={toHex(highlightColor)} /> por{' '}
-            <input type="color" title={replaceTo} value={replaceTo} onChange={(e) => setReplaceTo(e.target.value)} />
-            <button onClick={() => doReplace(highlightColor)}>trocar</button>
-          </div>
-        )}
-        {similar.length > 0 && (
-          <div className="similar">
-            <h4>Cores quase iguais</h4>
-            {similar.map(([a, b]) => (
-              <div key={`${a.color}-${b.color}`}>
-                <span className="sw" style={{ background: toHex(a.color) }} title={toHex(a.color)} />
-                <span className="sw" style={{ background: toHex(b.color) }} title={toHex(b.color)} />
-                <button onClick={() => mergeSimilar(a.color, b.color)}>juntar</button>
-              </div>
-            ))}
-          </div>
-        )}
+
+        <h3>Cores escolhidas</h3>
+        {recent.length === 0
+          ? <p className="muted">As cores que você usar aparecem aqui.</p>
+          : <div className="swatches">
+              {recent.map((c) => (
+                <button key={c} className={`sw ${c === color ? 'on' : ''}`} style={{ background: toHex(c) }}
+                  title={toHex(c)} onClick={() => setColor(c)} />
+              ))}
+            </div>}
       </aside>
 
       <section className="sheet">
@@ -281,6 +251,57 @@ export function App() {
       </section>
 
       <main>
+        {imageColorsOpen && (
+          <div className="floating">
+            <div className="panel-title">
+              <h3>Cores da imagem</h3>
+              <button className="small" title="Fechar" aria-label="Fechar" onClick={closeImageColors}>✕</button>
+            </div>
+            <label>Onde:{' '}
+              <select value={scopeKind} onChange={(e) => setScopeKind(e.target.value as ColorScopeKind)}>
+                <option value="tudo">sprite inteiro</option>
+                <option value="frame">frame atual</option>
+                <option value="camada">camada atual (neste frame)</option>
+              </select>
+            </label>
+            <label>Tolerância: {Math.round(tolerance * 100)}%
+              <input type="range" min={0} max={0.3} step={0.01} value={tolerance}
+                onChange={(e) => setTolerance(Number(e.target.value))} />
+            </label>
+            <ul className="used">
+              {used.map(({ color: c, count }) => (
+                <li key={c} className={c === highlightColor ? 'on' : ''} title={toHex(c)}>
+                  <button className="sw" style={{ background: toHex(c) }}
+                    onClick={() => setHighlightColor(c === highlightColor ? null : c)} title={`${toHex(c)} · clique para destacar`} />
+                  <span>{`${count} ${count === 1 ? "pixel" : "pixels"}`}</span>
+                  <button onClick={() => setColor(c)} title="usar esta cor">usar</button>
+                  {!sprite.palette.includes(c) && (
+                    <button onClick={() => { sprite.palette.push(c); refresh(); }} title="mandar para a paleta">+paleta</button>
+                  )}
+                </li>
+              ))}
+            </ul>
+            {highlightColor !== null && (
+              <div className="replace">
+                Trocar <span className="sw" style={{ background: toHex(highlightColor) }} title={toHex(highlightColor)} /> por{' '}
+                <input type="color" title={replaceTo} value={replaceTo} onChange={(e) => setReplaceTo(e.target.value)} />
+                <button onClick={() => doReplace(highlightColor)}>trocar</button>
+              </div>
+            )}
+            {similar.length > 0 && (
+              <div className="similar">
+                <h4>Cores quase iguais</h4>
+                {similar.map(([a, b]) => (
+                  <div key={`${a.color}-${b.color}`}>
+                    <span className="sw" style={{ background: toHex(a.color) }} title={toHex(a.color)} />
+                    <span className="sw" style={{ background: toHex(b.color) }} title={toHex(b.color)} />
+                    <button onClick={() => mergeSimilar(a.color, b.color)}>juntar</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         <canvas ref={editorRef} className="editor" style={{ width: sprite.width * ZOOM, height: sprite.height * ZOOM }}
           onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} />
       </main>

@@ -26,7 +26,8 @@ npm run build   # gera a versão final em dist/
 - Imagem nova sempre em múltiplos de 16 pixels (16x16 por padrão; outros valores são ajustados pro múltiplo mais próximo).
 - Lápis, borracha, balde e conta-gotas. Desfazer com Ctrl+Z e refazer com Ctrl+Shift+Z.
 - Paleta padrão **Rona64**: 64 cores em 8 rampas de 8 tons, com os escuros puxando pro roxo e os claros pro amarelo.
-- Painel **Cores da imagem**: mostra todas as cores usadas e quantos pixels cada uma tem. Clicar numa cor destaca os pixels dela e permite trocar a cor. Também junta cores quase iguais.
+- Lateral esquerda só com a paleta e as **cores escolhidas** (as 16 últimas cores usadas).
+- Painel **Cores da imagem**, que abre por um botão na barra de ferramentas: mostra todas as cores usadas e quantos pixels cada uma tem. Clicar numa cor destaca os pixels dela e permite trocar a cor. Também junta cores quase iguais.
 - Camadas com visibilidade.
 - **Tela dividida com a spritesheet**: à esquerda, a folha em grade, em que cada linha é uma animação (parado, andar ↓, andar →...). À direita, o frame escolhido grande pra desenhar. Os dois lados ficam sincronizados, e o preview em loop toca a linha atual.
 - Importar uma spritesheet PNG cortando em quadros (largura x altura) e exportar a folha inteira em PNG.
